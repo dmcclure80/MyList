@@ -62,14 +62,18 @@ class MyListViewController: UITableViewController {
     
     override func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         
-        //context.delete(itemArray[indexPath.row])
-        //itemArray.remove(at: indexPath.row)
+        if let item = itemList?[indexPath.row] {
+            do {
+            try realm.write {
+                item.done = !item.done
+            }
+            }  catch {
+                    print("Error saving done status, \(error)")
+            }
+        }
         
-/*
-        itemList[indexPath.row].done = !itemList[indexPath.row].done
+        tableView.reloadData()
         
-        saveItems()
-  */
         
         tableView.deselectRow(at: indexPath, animated: true)
     }
@@ -91,6 +95,7 @@ class MyListViewController: UITableViewController {
                 try self.realm.write {
                 let newItem = Item()
                 newItem.title = textField.text!
+                newItem.dateCreated = Date()
                 currentCategory.item.append(newItem)
                 }
             }  catch {
@@ -115,17 +120,6 @@ class MyListViewController: UITableViewController {
     
     //MARK - Model Manipulation Methods
     
-    /*func saveItems () {
-        
-        do {
-            try context.save()
-        }   catch {
-            print("Error Saving Context |(error)")
-        }
-        
-        
-        self.tableView.reloadData()
-    }*/
     
     func loadItems() {
         
@@ -138,18 +132,14 @@ class MyListViewController: UITableViewController {
     
 }   //MARK: - Search Bar methods
 
-/*
 extension MyListViewController: UISearchBarDelegate {
     
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
-        let request : NSFetchRequest<Item> = Item.fetchRequest()
         
-        let predicate = NSPredicate(format: "title CONTAINS[cd] %@", searchBar.text!)
+        itemList = itemList?.filter("title CONTAINS[cd] %@", searchBar.text!).sorted(byKeyPath: "dateCreated", ascending: true)
         
-        request.sortDescriptors = [NSSortDescriptor(key: "title", ascending: true)]
+        tableView.reloadData()
         
-        loadItems(with: request, predicate: predicate)
-        //loadItems()
     }
         
         func searchBar(_ searchBar: UISearchBar, textDidChange searchText: String) {
@@ -163,4 +153,4 @@ extension MyListViewController: UISearchBarDelegate {
             }
         }
 
-}*/
+}
