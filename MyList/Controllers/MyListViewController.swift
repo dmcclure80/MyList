@@ -9,7 +9,7 @@
 import UIKit
 import RealmSwift
 
-class MyListViewController: UITableViewController {
+class MyListViewController: SwipeTableViewController {
     
     var itemList: Results<Item>?
     let realm = try! Realm()
@@ -27,8 +27,6 @@ class MyListViewController: UITableViewController {
         
         //print(FileManager.default.urls(for: .documentDirectory, in: .userDomainMask))
         
-        
-        
     }
 
     //MARK - Tableview Datasource Methods
@@ -40,8 +38,9 @@ class MyListViewController: UITableViewController {
     
     //TODO: Declare cellForRowAtIndexPath here:
     override func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
+        let cell = super.tableView(tableView, cellForRowAt: indexPath)
         
-        let cell = tableView.dequeueReusableCell(withIdentifier: "MyListItemCell", for: indexPath)
+        //let cell = tableView.dequeueReusableCell(withIdentifier: "Cell", for: indexPath)
         
         if let item = itemList?[indexPath.row] {
             cell.textLabel?.text = item.title
@@ -129,6 +128,21 @@ class MyListViewController: UITableViewController {
         tableView.reloadData()
     }
     
+    //Mark: - Delete Data From Swipe
+    
+    override func updateModel(at indexPath: IndexPath) {
+        
+        if let itemForDeletion = self.itemList?[indexPath.row] {
+            do{
+                try self.realm.write {
+                    self.realm.delete(itemForDeletion)
+                }
+            }  catch{
+                print("Error deleting item, \(error)")
+            }
+            
+        }
+    }
     
 }   //MARK: - Search Bar methods
 
